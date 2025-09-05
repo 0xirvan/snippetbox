@@ -7,12 +7,14 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/0xirvan/snippetbox/internal/models"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {
-	errLog  *log.Logger
-	infoLog *log.Logger
+	errLog   *log.Logger
+	infoLog  *log.Logger
+	snippets *models.SnippetModel
 }
 
 func main() {
@@ -23,16 +25,17 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	app := &application{
-		infoLog: infoLog,
-		errLog:  errLog,
-	}
-
 	db, err := openDB(*dsn)
 	if err != nil {
-		app.errLog.Fatal(err)
+		errLog.Fatal(err)
 	}
 	defer db.Close()
+
+	app := &application{
+		infoLog:  infoLog,
+		errLog:   errLog,
+		snippets: &models.SnippetModel{DB: db},
+	}
 
 	srv := &http.Server{
 		Addr:     *addr,
