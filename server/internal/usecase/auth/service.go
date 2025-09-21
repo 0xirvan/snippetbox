@@ -47,11 +47,11 @@ func (s *AuthService) Register(ctx context.Context, email, password string) (*do
 	}
 
 	u := domainUser.NewUser(email, hashed)
-	if err := s.userRepo.Save(ctx, u); err != nil {
+	if err := s.userRepo.Save(ctx, &u); err != nil {
 		return nil, err
 	}
 
-	return u, nil
+	return &u, nil
 }
 
 func (s *AuthService) Login(ctx context.Context, email, password string) (string, error) {
