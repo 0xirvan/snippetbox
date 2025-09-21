@@ -9,5 +9,5 @@ import (
 type SnippetRepository interface {
 	Save(ctx context.Context, s *snippet.Snippet) error
 	GetByID(ctx context.Context, id uint) (*snippet.Snippet, error)
-	Latest(ctx context.Context) ([]*snippet.Snippet, error) // Latest 10
+	Latest(ctx context.Context, limit int) ([]*snippet.Snippet, error)
 }
