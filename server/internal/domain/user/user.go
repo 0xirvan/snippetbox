@@ -8,3 +8,10 @@ type User struct {
 	Password  string
 	CreatedAt time.Time
 }
+
+func NewUser(email, password string) *User {
+	return &User{
+		Email:    email,
+		Password: password,
+	}
+}
