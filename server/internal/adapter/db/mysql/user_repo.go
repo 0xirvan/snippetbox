@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/0xirvan/snippetbox/internal/domain/user"
 	"github.com/0xirvan/snippetbox/internal/port/auth"
@@ -18,6 +19,8 @@ func NewUserRepo(db *sql.DB) auth.AuthUserRepository {
 	}
 }
 
+var ErrNoUserFound = errors.New("no user found")
+
 func (r *UserRepo) Save(ctx context.Context, u *user.User) error {
 	_, err := r.db.ExecContext(ctx,
 		"INSERT INTO users (email, password) VALUES (?, ?)",
@@ -27,17 +30,14 @@ func (r *UserRepo) Save(ctx context.Context, u *user.User) error {
 }
 
 func (r *UserRepo) FindByEmail(ctx context.Context, email string) (*user.User, error) {
-	row, err := r.db.QueryContext(ctx,
-		"SELECT id, email, password FROM users WHERE email = ?",
+	row := r.db.QueryRowContext(ctx,
+		"SELECT * FROM users WHERE email = ?",
 		email,
 	)
-	if err != nil {
-		return nil, err
-	}
-
 	u := new(user.User)
-	if err := row.Scan(u.ID, u.Email, u.Password); err != nil {
-		return nil, err
+	err := row.Scan(u.ID, u.Email, u.Password, u.CreatedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNoUserFound
 	}
 	return u, nil
 }
