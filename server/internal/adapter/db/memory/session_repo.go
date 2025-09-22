@@ -16,8 +16,8 @@ type InMemSessionRepo struct {
 }
 
 var (
-	ErrNoUserFound    = errors.New("no user found")
-	ErrSessionExpired = errors.New("expired")
+	ErrSessionNotFound = errors.New("session not found")
+	ErrSessionExpired  = errors.New("session expired")
 )
 
 func NewInMemSessionRepo() sessionPort.SessionRepository {
@@ -47,12 +47,31 @@ func (r *InMemSessionRepo) Get(ctx context.Context, sessionID string) (userID ui
 	r.mu.RLock()
 	s, ok := r.sessions[sessionID]
 	r.mu.RUnlock()
+
 	if !ok {
-		return 0, ErrNoUserFound
+		return 0, ErrSessionNotFound
 	}
+
 	if time.Now().After(s.Expiry) {
-		r.Delete(ctx, sessionID)
 		return 0, ErrSessionExpired
 	}
+
 	return s.UserID, nil
+}
+
+func (r *InMemSessionRepo) StartCleanup(interval time.Duration) {
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			r.mu.Lock()
+			for sid, s := range r.sessions {
+				if time.Now().After(s.Expiry) {
+					delete(r.sessions, sid)
+				}
+			}
+			r.mu.Unlock()
+		}
+	}()
 }
