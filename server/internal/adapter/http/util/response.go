@@ -1,4 +1,4 @@
-package httpadapter
+package util
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func writeValidationError(w http.ResponseWriter, err error) {
+func WriteValidationError(w http.ResponseWriter, err error) {
 	if errs, ok := err.(validator.ValidationErrors); ok {
 		out := make(map[string]string)
 		for _, e := range errs {

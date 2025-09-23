@@ -1,10 +1,11 @@
-package httpadapter
+package handler
 
 import (
 	"encoding/json"
 	"net/http"
 	"time"
 
+	"github.com/0xirvan/snippetbox/internal/adapter/http/util"
 	"github.com/0xirvan/snippetbox/internal/dto"
 	"github.com/0xirvan/snippetbox/internal/shared/validator"
 	authsvc "github.com/0xirvan/snippetbox/internal/usecase/auth"
@@ -45,7 +46,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validator.ValidateStruct(req); err != nil {
-		writeValidationError(w, err)
+		util.WriteValidationError(w, err)
 		return
 	}
 
@@ -73,7 +74,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validator.ValidateStruct(req); err != nil {
-		writeValidationError(w, err)
+		util.WriteValidationError(w, err)
 		return
 	}
 
